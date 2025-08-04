@@ -1,0 +1,18 @@
+= CSP Bypass: Self-Sabotage
+:level: medium
+:tags: javascript, xss, csp, jsonp, web
+:author: timtheguy <github.com/timtheguy>
+
+A new "Profile Editor" feature has just been shipped. It includes a Content Security Policy (CSP) that was reviewed and approved because it successfully blocks standard cross-site scripting attacks.
+
+However, a clever user has discovered that they can still corrupt their own profile page, causing unauthorized code to run. Your task is to find the flaw in the application's defenses that allows the CSP to be bypassed and patch it.
+
+A good security policy should never trust any part of the application blindly.
+
+== Prerequisites
+
+Complete an 'Easy' level challenge focused on XSS first, to become familiar with the platform and get your skills ready.
+
+== Troubleshooting
+
+Ask your question on https://discuss.secdim.com[SecDim Discuss]
