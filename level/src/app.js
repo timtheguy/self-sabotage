@@ -13,7 +13,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // CSP middleware 
 app.use((req, res, next) => {
-    res.setHeader('Content-Security-Policy', `script-src 'self'; object-src 'none'; base-uri 'none';`);
+    // PATCH: Generate a nonce for each request.
+    res.locals.nonce = require('crypto').randomBytes(16).toString('base64');
+    
+    // PATCH: Implement a strict, nonce-based policy.
+    res.setHeader('Content-Security-Policy', `script-src 'nonce-${res.locals.nonce}'; object-src 'none'; base-uri 'none';`);
     next();
 });
 
@@ -39,7 +43,10 @@ let profile = { username: 'testuser', bio: 'Welcome to my profile!' };
 app.get('/profile', (req, res) => {
     const safeUsername = escapeHtml(profile.username);
     const safeBio = escapeHtml(profile.bio);
-
+    
+    // PATCH: Get the nonce from res.locals to use in the script tag.
+    const nonce = res.locals.nonce;
+    
     res.status(200).send(`
         <html>
         <head><title>Profile Editor</title></head>
@@ -57,7 +64,7 @@ app.get('/profile', (req, res) => {
             <p><b>Viewing profile for:</b> <strong id="username-preview" style="color: #0056b3;">⏳ Loading...</strong></p> 
             <div id="bio-preview" style="border: 1px solid #ccc; padding: 10px; background-color: #fff;">${sanitizeBio(profile.bio)}</div>
             
-            <script>
+            <script nonce="${nonce}">
                 // This script updates the username preview.
                 (function() {
                     const username = "${safeUsername}";
@@ -81,6 +88,12 @@ app.post('/profile', (req, res) => {
 // JSONP endpoint
 app.get('/api/get_user_info', (req, res) => {
     const callback = req.query.callback || '';
+    
+    // PATCH: Add validation to ensure the callback is a safe function name.
+    if (!/^[a-zA-Z0-9_]+$/.test(callback)) {
+        return res.status(400).send('// Invalid callback');
+    }
+    
     res.setHeader('Content-Type', 'application/javascript');
     res.status(200).send(`${callback}(${JSON.stringify(profile)});`);
 });
