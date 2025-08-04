@@ -90,7 +90,6 @@ app.get('/status', (req, res) => { res.status(200).end(); });
 app.head('/status', (req, res) => { res.status(200).end(); });
 app.get('/', (req, res) => { res.redirect('/profile'); });
 
-// Minimal server setup
 if (!module.parent) {
     app.listen(PORT, err => {
         if (err) {
