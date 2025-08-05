@@ -17,4 +17,19 @@ describe('Security Test', () => {
         expect(scriptSrc).not.toContain("'self'");
     });
 
+    it('A hardened Content Security Policy must not break critical page functionality', async () => {
+        const res = await request(app).get('/profile');
+        const csp = res.headers['content-security-policy'];
+        
+        // This test only triggers if a nonce is detected in the CSP.
+        const cspNonceMatch = csp.match(/script-src 'nonce-([^']+)'/);
+        
+        if (cspNonceMatch) {
+            // It then asserts that the legitimate script on the page has been
+            // correctly updated with the same nonce to ensure it can execute.
+            const expectedNonce = cspNonceMatch[1];
+            expect(res.text).toContain(`<script nonce="${expectedNonce}">`);
+        }
+    });
+
 });
